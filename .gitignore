@@ -1,0 +1,15 @@
+node_modules/
+.wrangler/
+data/
+site/
+test-results/
+playwright-report/
+*.log
+.env
+.env.*
+!.env.example
+.dev.vars
+src/generated/
+dist/
+evals/reports/_*
+evals/reports/ci-*

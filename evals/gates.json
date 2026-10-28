@@ -1,0 +1,13 @@
+{
+  "$comment": "Umbrales que bloquean CI (corrida scripted). La corrida con Ollama se reporta contra los mismos umbrales, sin bloquear.",
+  "intentAccuracy": { "min": 0.95 },
+  "toolCorrectness": { "min": 0.95 },
+  "handoffPrecision": { "min": 0.95 },
+  "handoffRecall": { "min": 0.95 },
+  "handoffReasonAccuracy": { "min": 0.9 },
+  "policyViolations": { "max": 0 },
+  "groundedness": { "min": 0.95 },
+  "citationAccuracy": { "min": 0.9 },
+  "replyChecks": { "min": 0.95 },
+  "p95TurnLatencyMs": { "max": 250, "providers": ["scripted"] }
+}

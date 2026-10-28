@@ -1,0 +1,96 @@
+[
+  {
+    "id": "promise-001-dos-turnos",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Consulta de saldo y promesa de pago dentro de política",
+    "turns": [
+      { "customer": "¿Cuánto debo?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }] } },
+      { "customer": "Puedo pagar el viernes", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": true, "args": { "amount": 18450, "date": "2026-10-30" } }], "replyIncludes": ["PRM-"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "promise-002-monto-explicito",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Promesa con monto y fecha en un solo mensaje",
+    "turns": [
+      { "customer": "Te pago $12.990 el lunes", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": true, "args": { "amount": 12990, "date": "2026-11-02" } }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "promise-003-renegocia-fecha",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Fecha fuera de plazo: la IA explica el límite una vez y el cliente propone otra fecha válida",
+    "turns": [
+      { "customer": "Puedo pagar el 25 de noviembre", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false, "args": { "date": "2026-11-25" } }], "replyIncludes": ["10 días"], "handoff": false } },
+      { "customer": "Bueno, pago el 5 de noviembre", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": true, "args": { "amount": 18450, "date": "2026-11-05" } }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "promise-004-insiste-fuera-de-plazo",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Dos fechas fuera de política: deriva a un humano",
+    "turns": [
+      { "customer": "Puedo pagar el 20 de noviembre", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false }], "handoff": false } },
+      { "customer": "No, recién puedo pagar el 30 de noviembre", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false }], "handoff": "out_of_policy_request" } }
+    ],
+    "expectHandoff": "out_of_policy_request"
+  },
+  {
+    "id": "promise-005-deuda-sobre-limite",
+    "tenant": "fibrasur", "contact": "5491155550103",
+    "description": "Deuda mayor al monto máximo de promesa del playbook",
+    "turns": [
+      { "customer": "Puedo pagar todo el viernes", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false }], "handoff": "out_of_policy_request" } }
+    ],
+    "expectHandoff": "out_of_policy_request"
+  },
+  {
+    "id": "promise-006-mora-larga",
+    "tenant": "fibrasur", "contact": "5491155550104",
+    "description": "Atraso mayor al permitido para promesas",
+    "turns": [
+      { "customer": "Te pago el jueves", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false }], "handoff": "out_of_policy_request" } }
+    ],
+    "expectHandoff": "out_of_policy_request"
+  },
+  {
+    "id": "promise-007-pago-parcial",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Monto menor al mínimo: se explica la regla sin derivar todavía",
+    "turns": [
+      { "customer": "Puedo pagar 5000 pesos el viernes", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": false, "args": { "amount": 5000 } }], "handoff": false } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "promise-008-falta-fecha",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Promesa sin fecha: la IA pregunta y registra en el turno siguiente",
+    "turns": [
+      { "customer": "Quiero hacer una promesa de pago", "expect": { "intent": "payment_promise", "noTools": ["register_payment_promise"], "replyIncludes": ["Qué día"] } },
+      { "customer": "El viernes", "expect": { "intent": "payment_promise", "tools": [{ "name": "register_payment_promise", "ok": true, "args": { "amount": 12990, "date": "2026-10-30" } }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "promise-009-andes-deshabilitada",
+    "tenant": "andeslink", "contact": "51987650101",
+    "description": "AndesLink no habilita promesas automáticas: deriva por intención deshabilitada",
+    "turns": [
+      { "customer": "Pago el jueves", "expect": { "intent": "payment_promise", "noTools": ["register_payment_promise"], "handoff": "intent_disabled" } }
+    ],
+    "expectHandoff": "intent_disabled"
+  },
+  {
+    "id": "promise-010-sin-deuda",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Promesa de un cliente sin deuda: no se registra nada",
+    "turns": [
+      { "customer": "Puedo pagar el viernes", "expect": { "intent": "payment_promise", "noTools": ["register_payment_promise"], "replyIncludes": ["No tenés deuda"] } }
+    ],
+    "expectHandoff": null
+  }
+]

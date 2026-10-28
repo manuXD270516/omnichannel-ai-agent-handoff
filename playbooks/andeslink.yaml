@@ -1,0 +1,64 @@
+# Playbook del cliente ficticio "AndesLink" (ISP, Perú). Datos sintéticos.
+# Mismo núcleo, otras reglas: sin promesas de pago automáticas, trato de "usted",
+# umbrales de derivación más conservadores y otra base de conocimiento.
+tenant:
+  id: andeslink
+  name: AndesLink Fibra
+  country: PE
+  timezone: America/Lima
+  currency: PEN
+  languages: [es]
+
+tone:
+  persona: "Usted conversa con Ande, el asistente virtual de AndesLink. Formal, cordial y preciso."
+  address: usted
+  maxReplyChars: 500
+  signature: "Ande · AndesLink"
+
+businessHours:
+  days: [1, 2, 3, 4, 5]
+  open: "09:00"
+  close: "18:00"
+
+intents:
+  # payment_promise NO está habilitada: este cliente exige que cobranzas lo vea una persona.
+  enabled: [billing_inquiry, tech_support, schedule_visit, cancellation, greeting, other]
+
+billing:
+  maxPromiseAmount: 400
+  maxPromiseDays: 5
+  minPromisePercent: 1.0
+  maxOverdueDaysForPromise: 30
+
+handoff:
+  onExplicitRequest: true
+  minConfidence: 0.65
+  lowConfidenceStrikes: 1
+  negativeSentimentTurns: 2
+  maxUnresolvedTurns: 2
+  alwaysHumanIntents: [cancellation]
+  urgencyHandoff: [high, critical]
+  onOutOfPolicyRequest: true
+  injectionStrikes: 1
+  queue: "mesa-de-ayuda"
+  messages:
+    inHours: "Le comunico con un asesor de AndesLink. Ya cuenta con el detalle de su consulta y le responderá en breve."
+    outOfHours: "Le comunico con un asesor de AndesLink. Nuestro horario es de lunes a viernes de 9 a 18; le contactaremos al inicio del próximo horario hábil con el detalle de su consulta."
+
+integrations:
+  crm: { adapter: mock-crm, pipeline: mesa }
+  erp: { adapter: mock-erp }
+  calendar: { adapter: mock-calendar, visitDurationMin: 180 }
+
+kb:
+  collection: andeslink
+  minScore: 2.0
+  topK: 3
+
+channels:
+  whatsapp:
+    phoneNumberId: "100000000000002"
+    displayPhone: "+51 1 555-0000"
+  voice:
+    enabled: true
+    transferNumber: "+5115550099"

@@ -1,0 +1,23 @@
+# Cloudflare Workers: mismo núcleo que la versión Node, con D1 como store.
+# Probado localmente con `pnpm worker:dev` (workerd + D1 local).
+# Para desplegar en la cuenta del cliente: ver docs/implementation-runbook.md.
+name = "omnichannel-ai-agent-handoff"
+main = "src/worker.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+LLM_PROVIDER = "scripted"
+WHATSAPP_MODE = "mock"
+ENABLE_SIMULATOR = "true"
+
+# Los secretos NO van acá. Se cargan con `wrangler secret put <NOMBRE>`:
+# WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN, WHATSAPP_ACCESS_TOKEN, DASHBOARD_TOKEN, ANTHROPIC_API_KEY.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "oah-db"
+# Reemplazar por el id que devuelve `wrangler d1 create oah-db` antes de desplegar.
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[observability]
+enabled = true

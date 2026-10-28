@@ -1,0 +1,42 @@
+{
+  "name": "omnichannel-ai-agent-handoff",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma multiagente de atención al cliente (WhatsApp + voz) con derivación a humanos, playbooks por cliente y evaluación con gates.",
+  "license": "MIT",
+  "author": "Manuel Saavedra",
+  "type": "module",
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "bundle": "tsx scripts/bundle-config.ts",
+    "dev": "pnpm bundle && tsx watch --env-file-if-exists=.env src/node.ts",
+    "start": "pnpm bundle && tsx --env-file-if-exists=.env src/node.ts",    "typecheck": "pnpm bundle && tsc --noEmit",
+    "test": "pnpm bundle && vitest run",
+    "eval": "pnpm bundle && tsx evals/run.ts",
+    "eval:ollama": "pnpm bundle && tsx evals/run.ts --provider ollama",
+    "e2e": "pnpm bundle && playwright test",
+    "simulate": "tsx scripts/simulate-whatsapp.ts",
+    "demo:build": "pnpm bundle && tsx scripts/build-demo.ts",
+    "worker:dev": "pnpm bundle && wrangler dev",
+    "worker:deploy": "pnpm bundle && wrangler deploy",
+    "ci": "pnpm typecheck && pnpm test && pnpm eval"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "hono": "^4.13.14",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261028.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.154.0"
+  }
+}

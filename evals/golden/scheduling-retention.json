@@ -1,0 +1,87 @@
+[
+  {
+    "id": "sched-001-directo",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Pedido directo de visita y elección por ordinal",
+    "turns": [
+      { "customer": "Quiero agendar una visita técnica", "expect": { "intent": "schedule_visit", "tools": [{ "name": "get_available_slots", "ok": true }] } },
+      { "customer": "El primero", "expect": { "intent": "schedule_visit", "tools": [{ "name": "book_visit", "ok": true, "args": { "slotId": "S-20261028-0900-caba-norte" } }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "sched-002-por-dia-y-hora",
+    "tenant": "fibrasur", "contact": "5491155550104",
+    "description": "Elección por día y hora en lenguaje natural",
+    "turns": [
+      { "customer": "Necesito que venga un técnico", "expect": { "intent": "schedule_visit", "tools": [{ "name": "get_available_slots", "ok": true }] } },
+      { "customer": "El jueves a las 9", "expect": { "intent": "schedule_visit", "tools": [{ "name": "book_visit", "ok": true, "args": { "slotId": "S-20261029-0900-caba-norte" } }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "sched-003-sin-cobertura",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Zona sin agenda disponible: lo coordina una persona",
+    "turns": [
+      { "customer": "Quiero que venga un técnico a mi casa", "expect": { "intent": "schedule_visit", "tools": [{ "name": "get_available_slots", "ok": true }], "handoff": "out_of_policy_request" } }
+    ],
+    "expectHandoff": "out_of_policy_request"
+  },
+  {
+    "id": "sched-004-andes",
+    "tenant": "andeslink", "contact": "51987650101",
+    "description": "Agenda en AndesLink (visitas de 3 h)",
+    "turns": [
+      { "customer": "Deseo programar una visita técnica", "expect": { "intent": "schedule_visit", "tools": [{ "name": "get_available_slots", "ok": true }], "replyIncludes": ["09:00 a 12:00"] } },
+      { "customer": "2", "expect": { "intent": "schedule_visit", "tools": [{ "name": "book_visit", "ok": true }] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "sched-005-desconocido",
+    "tenant": "fibrasur", "contact": "5491155559998",
+    "description": "Sin cliente identificado no se reserva",
+    "turns": [
+      { "customer": "Quiero una visita técnica", "expect": { "intent": "schedule_visit", "noTools": ["get_available_slots", "book_visit"], "replyIncludes": ["titular"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "cancel-001-baja",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "La baja siempre la gestiona retención",
+    "turns": [
+      { "customer": "Quiero dar de baja el servicio", "expect": { "intent": "cancellation", "handoff": "always_human_intent" } }
+    ],
+    "expectHandoff": "always_human_intent"
+  },
+  {
+    "id": "cancel-002-competidor",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Se va a la competencia",
+    "turns": [
+      { "customer": "Me voy a cambiar a otra empresa, ¿cómo hago la baja?", "expect": { "intent": "cancellation", "handoff": "always_human_intent" } }
+    ],
+    "expectHandoff": "always_human_intent"
+  },
+  {
+    "id": "cancel-003-andes",
+    "tenant": "andeslink", "contact": "51987650103",
+    "description": "Baja en AndesLink",
+    "turns": [
+      { "customer": "Deseo cancelar mi contrato", "expect": { "intent": "cancellation", "handoff": "always_human_intent" } }
+    ],
+    "expectHandoff": "always_human_intent"
+  },
+  {
+    "id": "cancel-004-tras-consulta",
+    "tenant": "fibrasur", "contact": "5491155550103",
+    "description": "Consulta de saldo y después pedido de baja",
+    "turns": [
+      { "customer": "¿Cuánto debo?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }] } },
+      { "customer": "Es mucho, quiero darme de baja", "expect": { "intent": "cancellation", "handoff": "always_human_intent" } }
+    ],
+    "expectHandoff": "always_human_intent"
+  }
+]

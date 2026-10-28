@@ -1,0 +1,61 @@
+# Playbook del cliente ficticio "Fibrasur" (ISP, Argentina). Datos sintéticos.
+tenant:
+  id: fibrasur
+  name: Fibrasur Internet
+  country: AR
+  timezone: America/Argentina/Buenos_Aires
+  currency: ARS
+  languages: [es]
+
+tone:
+  persona: "Sos Sofi, la asistente virtual de Fibrasur. Cercana, clara y breve."
+  address: vos
+  maxReplyChars: 600
+  signature: "Sofi · Fibrasur"
+
+businessHours:
+  days: [1, 2, 3, 4, 5, 6]
+  open: "08:00"
+  close: "21:00"
+
+intents:
+  enabled: [billing_inquiry, payment_promise, tech_support, schedule_visit, cancellation, greeting, other]
+
+billing:
+  maxPromiseAmount: 60000      # deudas mayores van a un humano
+  maxPromiseDays: 10           # la promesa no puede superar 10 días
+  minPromisePercent: 1.0       # se promete pagar el total adeudado
+  maxOverdueDaysForPromise: 60
+
+handoff:
+  onExplicitRequest: true
+  minConfidence: 0.55
+  lowConfidenceStrikes: 2
+  negativeSentimentTurns: 2
+  maxUnresolvedTurns: 3
+  alwaysHumanIntents: [cancellation]
+  urgencyHandoff: [critical]
+  onOutOfPolicyRequest: true
+  injectionStrikes: 2
+  queue: "atencion-general"
+  messages:
+    inHours: "Te paso con una persona del equipo, ya tiene todo el contexto así que no vas a tener que repetir nada. Te responde en unos minutos."
+    outOfHours: "Te paso con una persona del equipo. Ahora estamos fuera de horario (lun a sáb de 8 a 21), así que te escriben apenas abramos, con todo el contexto de esta charla."
+
+integrations:
+  crm: { adapter: mock-crm, pipeline: soporte }
+  erp: { adapter: mock-erp }
+  calendar: { adapter: mock-calendar, visitDurationMin: 120 }
+
+kb:
+  collection: fibrasur
+  minScore: 2.0
+  topK: 3
+
+channels:
+  whatsapp:
+    phoneNumberId: "100000000000001"
+    displayPhone: "+54 11 5555-0000"
+  voice:
+    enabled: true
+    transferNumber: "+541155550099"

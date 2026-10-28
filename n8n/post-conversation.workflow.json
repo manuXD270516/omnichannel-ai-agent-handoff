@@ -1,0 +1,70 @@
+{
+  "name": "Post-conversación: encuesta CSAT + nota en CRM",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "post-conversation", "responseMode": "onReceived", "options": {} },
+      "id": "a1f0c7f2-0001-4a1e-9d01-000000000001",
+      "name": "Conversación cerrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "post-conversation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json.body.channel }}", "rightValue": "whatsapp", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1f0c7f2-0002-4a1e-9d01-000000000002",
+      "name": "¿Canal WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/v21.0/' + $env.WHATSAPP_PHONE_NUMBER_ID + '/messages' }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "={{ 'Bearer ' + $env.WHATSAPP_ACCESS_TOKEN }}" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.body.contactId, type: 'template', template: { name: 'encuesta_csat', language: { code: 'es' }, components: [{ type: 'body', parameters: [{ type: 'text', text: $json.body.resolvedBy === 'ai' ? 'nuestro asistente' : 'nuestro equipo' }] }] } }) }}",
+        "options": {}
+      },
+      "id": "a1f0c7f2-0003-4a1e-9d01-000000000003",
+      "name": "Enviar encuesta CSAT (plantilla)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_NOTES_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ticketId: $json.body.crmTicketId, note: 'Conversación ' + $json.body.conversationId + ' cerrada. Resuelta por: ' + $json.body.resolvedBy + (($json.body.handoffReason) ? '. Motivo de derivación: ' + $json.body.handoffReason : '') }) }}",
+        "options": {}
+      },
+      "id": "a1f0c7f2-0004-4a1e-9d01-000000000004",
+      "name": "Nota en CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 400]
+    }
+  ],
+  "connections": {
+    "Conversación cerrada": { "main": [[{ "node": "¿Canal WhatsApp?", "type": "main", "index": 0 }, { "node": "Nota en CRM", "type": "main", "index": 0 }]] },
+    "¿Canal WhatsApp?": { "main": [[{ "node": "Enviar encuesta CSAT (plantilla)", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

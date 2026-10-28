@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bandeja omnicanal</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1d2433; --muted: #5d6779; --line: #e1e5ec;
+    --accent: #2457d6; --ai: #eef3ff; --cust: #ffffff; --human: #e9f7ef; --sys: #fff8e6;
+    --warn: #b3261e; --ok: #1b7f4b; --pend: #b26a00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #12151b; --panel: #1b2029; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2b3240;
+      --accent: #7aa2ff; --ai: #1f2a44; --cust: #232a35; --human: #1d3529; --sys: #3a3120; --warn: #ff8a80; --ok: #6fdc9c; --pend: #ffc266; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  .kpis { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kpi { border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; min-width: 96px; }
+  .kpi b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .kpi span { color: var(--muted); font-size: 12px; }
+  main { display: grid; grid-template-columns: 300px 1fr 360px; gap: 12px; padding: 12px 16px; height: calc(100vh - 74px); }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; height: auto; } }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: auto; min-height: 200px; }
+  section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0; padding: 10px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px; border-bottom: 1px solid var(--line); }
+  .tabs button, .btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 4px 9px; cursor: pointer; font: inherit; }
+  .tabs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .conv { padding: 9px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .conv:hover, .conv.sel { background: var(--ai); }
+  .conv .top { display: flex; justify-content: space-between; gap: 8px; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .badge { font-size: 11px; border-radius: 99px; padding: 1px 8px; border: 1px solid currentColor; white-space: nowrap; }
+  .st-pending_human { color: var(--pend); } .st-human { color: var(--ok); } .st-ai { color: var(--accent); } .st-closed { color: var(--muted); }
+  .msgs { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 80%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); white-space: pre-wrap; }
+  .msg.customer { align-self: flex-start; background: var(--cust); }
+  .msg.ai { align-self: flex-end; background: var(--ai); }
+  .msg.human_agent { align-self: flex-end; background: var(--human); }
+  .msg.system { align-self: center; background: var(--sys); font-size: 12px; }
+  .msg .who { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .box { padding: 12px; border-bottom: 1px solid var(--line); }
+  .box h3 { margin: 0 0 6px; font-size: 13px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 0; font-size: 13px; }
+  dt { color: var(--muted); }
+  textarea, input, select { width: 100%; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); }
+  .row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .row > * { flex: 1; }
+  .reason { color: var(--warn); font-weight: 600; }
+  .step { font-family: ui-monospace, monospace; font-size: 12px; padding: 2px 0; }
+  .turn { border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 6px; }
+  .err { color: var(--warn); font-size: 12px; min-height: 16px; }
+  .static-note { background: var(--sys); padding: 6px 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="staticNote" class="static-note" hidden>Demo estática: replay de conversaciones sintéticas generadas por el pipeline. Las acciones están deshabilitadas (no hay backend).</div>
+<header>
+  <h1>Bandeja omnicanal · IA + humanos</h1>
+  <div class="kpis" data-testid="kpis">
+    <div class="kpi"><b id="k-conv">–</b><span>conversaciones</span></div>
+    <div class="kpi"><b id="k-cont">–</b><span>contención IA</span></div>
+    <div class="kpi"><b id="k-queue">–</b><span>en cola humana</span></div>
+    <div class="kpi"><b id="k-p95">–</b><span>latencia p95 / turno</span></div>
+    <div class="kpi"><b id="k-prov">–</b><span>proveedor LLM</span></div>
+  </div>
+</header>
+<main>
+  <section>
+    <h2>Conversaciones</h2>
+    <div class="tabs" id="tabs">
+      <button data-st="pending_human" class="on">En cola</button>
+      <button data-st="human">Con humano</button>
+      <button data-st="ai">IA</button>
+      <button data-st="closed">Cerradas</button>
+      <button data-st="">Todas</button>
+    </div>
+    <div id="list" data-testid="conv-list"></div>
+    <div class="box" id="simBox">
+      <h3>Simulador de WhatsApp</h3>
+      <div class="row">
+        <select id="simTenant" data-testid="sim-tenant"><option value="fibrasur">Fibrasur (AR)</option><option value="andeslink">AndesLink (PE)</option></select>
+        <input id="simFrom" data-testid="sim-from" value="+5491155550101" aria-label="Teléfono">
+      </div>
+      <div class="row"><input id="simText" data-testid="sim-text" placeholder="Mensaje del cliente" aria-label="Mensaje"></div>
+      <div class="row"><button class="btn primary" id="simSend" data-testid="sim-send">Enviar como cliente</button></div>
+      <div class="err" id="simErr"></div>
+    </div>
+  </section>
+  <section>
+    <h2 id="convTitle">Seleccioná una conversación</h2>
+    <div class="msgs" id="msgs" data-testid="messages"></div>
+  </section>
+  <section>
+    <h2>Derivación y traza</h2>
+    <div id="side"></div>
+  </section>
+</main>
+<script>
+  const STATIC = window.__STATIC__ || null;
+  let filter = "pending_human";
+  let selected = null;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+  async function api(path, body) {
+    if (STATIC) {
+      if (body) throw new Error("Demo estática: sin backend");
+      if (path.startsWith("/api/metrics")) return STATIC.metrics;
+      if (path.startsWith("/api/conversations?")) {
+        const st = new URLSearchParams(path.split("?")[1]).get("status");
+        return STATIC.conversations.filter((c) => !st || c.status === st);
+      }
+      const m = path.match(/^\/api\/conversations\/([^/]+)(\/traces)?$/);
+      if (m) return m[2] ? (STATIC.traces[m[1]] || []) : STATIC.conversations.find((c) => c.id === m[1]);
+      if (path === "/health") return { provider: STATIC.provider };
+      return null;
+    }
+    const res = await fetch(path, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    return data;
+  }
+
+  async function refresh() {
+    const [m, h, list] = await Promise.all([api("/api/metrics"), api("/health"), api("/api/conversations?status=" + filter)]);
+    $("k-conv").textContent = m.conversations;
+    $("k-cont").textContent = Math.round(m.containmentRate * 100) + "%";
+    $("k-queue").textContent = m.queuePending;
+    $("k-p95").textContent = m.latencyMs.p95 + " ms";
+    $("k-prov").textContent = h.provider;
+    $("list").innerHTML = list.length ? list.map((c) => `
+      <div class="conv ${c.id === selected ? "sel" : ""}" data-id="${c.id}" data-testid="conv-item">
+        <div class="top"><b>${esc(c.customerName || c.contactId)}</b><span class="badge st-${c.status}">${statusLabel(c.status)}</span></div>
+        <div class="muted">${esc(c.tenantId)} · ${c.channel} · ${c.turns.length} turnos${c.handoff ? " · " + esc(c.handoff.reason) : ""}</div>
+      </div>`).join("") : '<div class="box muted">Sin conversaciones en este estado.</div>';
+    document.querySelectorAll(".conv").forEach((el) => el.onclick = () => { selected = el.dataset.id; refresh(); });
+    const editing = ["replyText", "agentName"].includes(document.activeElement && document.activeElement.id) || ($("replyText") && $("replyText").value);
+    if (selected && !editing) await renderConversation(selected);
+  }
+
+  function statusLabel(s) {
+    return { pending_human: "en cola", human: "con humano", ai: "IA", closed: "cerrada" }[s] || s;
+  }
+
+  async function renderConversation(id) {
+    const [c, traces] = await Promise.all([api("/api/conversations/" + id), api("/api/conversations/" + id + "/traces")]);
+    if (!c) return;
+    $("convTitle").textContent = (c.customerName || c.contactId) + " · " + c.tenantId + " · " + c.channel;
+    $("msgs").innerHTML = c.messages.map((m) => `
+      <div class="msg ${m.role}" data-testid="msg-${m.role}">
+        <div class="who">${{ customer: "Cliente", ai: "IA" + (m.agent ? " · " + esc(m.agent) : ""), human_agent: "Agente · " + esc(m.author), system: "Sistema" }[m.role]}</div>${esc(m.text)}</div>`).join("");
+    const h = c.handoff || c.handoffHistory[c.handoffHistory.length - 1];
+    const b = h && h.brief;
+    const disabled = STATIC ? "disabled" : "";
+    $("side").innerHTML = `
+      <div class="box">
+        <h3>Estado: <span class="badge st-${c.status}" data-testid="conv-status">${statusLabel(c.status)}</span></h3>
+        ${h ? `<dl>
+          <dt>Motivo</dt><dd class="reason" data-testid="handoff-reason">${esc(h.reason)}</dd>
+          <dt>Detalle</dt><dd>${esc(h.detail)}</dd>
+          <dt>Ticket CRM</dt><dd>${esc(h.crmTicketId)}</dd>
+          <dt>Cola</dt><dd>${esc(b.queue)} · prioridad ${esc(b.priority)}</dd>
+          <dt>Horario</dt><dd>${h.withinBusinessHours ? "dentro de horario" : "fuera de horario"}</dd>
+          ${h.claimedBy ? `<dt>Tomada por</dt><dd>${esc(h.claimedBy)}</dd>` : ""}
+        </dl>` : '<div class="muted">Sin derivación.</div>'}
+      </div>
+      ${h ? `<div class="box"><h3>Resumen para el agente</h3><div data-testid="handoff-summary">${esc(h.summary)}</div></div>
+      <div class="box"><h3>Ficha del cliente (CRM / ERP)</h3><dl>
+        <dt>Cliente</dt><dd>${esc(b.customer ? b.customer.name + " (" + b.customer.id + ")" : "no identificado")}</dd>
+        ${b.customer ? `<dt>Plan</dt><dd>${esc(b.customer.plan)} · ${esc(b.customer.segment)}</dd><dt>Zona</dt><dd>${esc(b.customer.zone)}</dd>` : ""}
+        ${b.lastBalance ? `<dt>Saldo</dt><dd>${esc(b.lastBalance.total)} ${esc(b.lastBalance.currency)} · ${b.lastBalance.overdueDays} días</dd>` : ""}
+        <dt>Intención</dt><dd>${esc(b.intent)} · ${esc(b.sentiment)} · urgencia ${esc(b.urgency)}</dd>
+        <dt>Tools</dt><dd>${esc(b.toolsUsed.join(", ") || "ninguno")}</dd>
+      </dl></div>` : ""}
+      <div class="box">
+        <h3>Acciones del agente humano</h3>
+        <div class="row"><input id="agentName" data-testid="agent-name" value="Valentina (N1)" aria-label="Nombre del agente"></div>
+        <div class="row">
+          <button class="btn primary" data-testid="claim" ${disabled} ${c.status !== "pending_human" ? "disabled" : ""} onclick="act('claim')">Tomar</button>
+          <button class="btn" data-testid="release" ${disabled} ${c.status !== "human" ? "disabled" : ""} onclick="act('release')">Devolver a la IA</button>
+          <button class="btn" data-testid="close" ${disabled} ${c.status === "closed" ? "disabled" : ""} onclick="act('close')">Cerrar</button>
+        </div>
+        <div class="row"><textarea id="replyText" data-testid="reply-text" rows="2" placeholder="Respuesta al cliente" ${c.status !== "human" || STATIC ? "disabled" : ""}></textarea></div>
+        <div class="row"><button class="btn primary" data-testid="reply-send" ${c.status !== "human" || STATIC ? "disabled" : ""} onclick="act('reply')">Enviar respuesta</button></div>
+        <div class="err" id="actErr"></div>
+      </div>
+      <div class="box"><h3>Traza por turno</h3>${traces.map((t) => `
+        <div class="turn" data-testid="trace">
+          <div><b>Turno ${t.turnIndex + 1}</b> · ${t.totalLatencyMs} ms · ${esc(t.provider)} · decisión: <b>${esc(t.decision.action)}</b>${t.decision.reason ? " (" + esc(t.decision.reason) + ")" : ""}</div>
+          ${t.steps.map((s) => `<div class="step">${esc(s.agent)}.${esc(s.step)} · ${s.latencyMs} ms${s.output && s.output.intent ? " → " + esc(s.output.intent) + " (" + s.output.confidence + ")" : ""}${s.output && s.output.tools ? " → " + esc(s.output.tools.join(", ")) : ""}${s.output && s.output.flags && s.output.flags.length ? " → " + esc(s.output.flags.join(", ")) : ""}</div>`).join("")}
+        </div>`).join("") || '<div class="muted">Sin trazas.</div>'}</div>`;
+  }
+
+  async function act(kind) {
+    $("actErr").textContent = "";
+    try {
+      const agent = $("agentName").value;
+      const body = kind === "reply" ? { agent, text: $("replyText").value } : { agent };
+      await api("/api/conversations/" + selected + "/" + kind, body);
+      if ($("replyText")) $("replyText").value = "";
+      if (kind === "claim") filter = "human";
+      if (kind === "release") filter = "ai";
+      if (kind === "close") filter = "closed";
+      document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.st === filter));
+      await refresh();
+    } catch (e) { $("actErr").textContent = e.message; }
+  }
+  window.act = act;
+
+  document.querySelectorAll("#tabs button").forEach((b) => b.onclick = () => {
+    filter = b.dataset.st;
+    document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+    refresh();
+  });
+
+  $("simSend").onclick = async () => {
+    $("simErr").textContent = "";
+    try {
+      const tenant = $("simTenant").value;
+      await api("/simulator/whatsapp/" + tenant, { from: $("simFrom").value, text: $("simText").value });
+      $("simText").value = "";
+      const convs = await api("/api/conversations?status=");
+      const phone = $("simFrom").value.replace(/\D/g, "");
+      const c = convs.find((x) => x.contactId === phone && x.tenantId === tenant);
+      if (c) { selected = c.id; filter = c.status; document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.st === filter)); }
+      await refresh();
+    } catch (e) { $("simErr").textContent = e.message; }
+  };
+  $("simTenant").onchange = () => { $("simFrom").value = $("simTenant").value === "fibrasur" ? "+5491155550101" : "+51987650101"; };
+
+  if (STATIC) {
+    $("staticNote").hidden = false;
+    $("simBox").hidden = true;
+    filter = "";
+    document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x.dataset.st === ""));
+    selected = STATIC.initial || null;
+  } else {
+    setInterval(refresh, 4000);
+  }
+  refresh();
+</script>
+</body>
+</html>

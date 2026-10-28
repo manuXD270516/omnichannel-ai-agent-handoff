@@ -1,0 +1,65 @@
+[
+  {
+    "id": "billing-001-saldo",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Consulta de deuda simple con cliente identificado por teléfono",
+    "turns": [
+      { "customer": "Hola, ¿cuánto debo?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }], "replyIncludes": ["18.450"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-002-sin-deuda",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Cliente al día",
+    "turns": [
+      { "customer": "Quiero saber si tengo deuda", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }], "replyIncludes": ["No tenés deuda"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-003-medios-de-pago",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Pregunta general de facturación que se responde con la KB",
+    "turns": [
+      { "customer": "¿Cuáles son los medios de pago?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "search_kb" }], "cites": ["facturacion#medios-de-pago"], "replyIncludes": ["débito automático"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-004-detalle-factura",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Consulta de factura con atraso",
+    "turns": [
+      { "customer": "¿Cuánto es mi factura de este mes?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }], "replyIncludes": ["12.990"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-005-andes-saldo",
+    "tenant": "andeslink", "contact": "51987650101",
+    "description": "Mismo caso en otro tenant: trato de usted y moneda PEN",
+    "turns": [
+      { "customer": "Buenos días, ¿cuál es mi saldo?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }], "replyIncludes": ["129.90", "Su saldo"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-006-andes-sin-deuda",
+    "tenant": "andeslink", "contact": "51987650102",
+    "description": "Cliente al día en AndesLink",
+    "turns": [
+      { "customer": "¿Tengo alguna deuda pendiente?", "expect": { "intent": "billing_inquiry", "tools": [{ "name": "get_balance", "ok": true }], "replyIncludes": ["no registra deuda"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "billing-007-numero-desconocido",
+    "tenant": "fibrasur", "contact": "5491155559999",
+    "description": "Número no registrado: no se consulta el ERP ni se inventa un saldo",
+    "turns": [
+      { "customer": "¿Cuánto debo?", "expect": { "intent": "billing_inquiry", "noTools": ["get_balance"], "replyIncludes": ["No encuentro una cuenta"] } }
+    ],
+    "expectHandoff": null
+  }
+]

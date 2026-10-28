@@ -1,0 +1,115 @@
+[
+  {
+    "id": "tech-001-los-rojo-visita",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Diagnóstico guiado: LOS en rojo → la IA ofrece visita → agenda",
+    "turns": [
+      { "customer": "No tengo internet, la luz LOS está en rojo", "expect": { "intent": "tech_support", "tools": [{ "name": "search_kb" }], "cites": ["sin-conexion#revisar-las-luces-del-modem"], "replyIncludes": ["visita"] } },
+      { "customer": "Sí", "expect": { "intent": "schedule_visit", "tools": [{ "name": "get_available_slots", "ok": true }] } },
+      { "customer": "El 2", "expect": { "intent": "schedule_visit", "tools": [{ "name": "book_visit", "ok": true }], "replyIncludes": ["VIS-"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-002-reinicio-guiado",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Primero el paso de reinicio; si sigue igual, la KB indica visita",
+    "turns": [
+      { "customer": "Se me cortó internet, ¿qué hago?", "expect": { "intent": "tech_support", "tools": [{ "name": "search_kb" }] } },
+      { "customer": "Ya reinicié el módem y sigue sin funcionar", "expect": { "intent": "tech_support", "cites": ["sin-conexion#si-sigue-sin-funcionar"], "replyIncludes": ["visita"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-003-lento",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Lentitud: medir por cable",
+    "turns": [
+      { "customer": "Internet anda muy lento, ¿cómo mido la velocidad?", "expect": { "intent": "tech_support", "cites": ["internet-lento#medir-la-velocidad-correctamente"], "replyIncludes": ["cable"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-004-clave-wifi",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Cambio de clave del wifi desde la app",
+    "turns": [
+      { "customer": "¿Cómo cambio la clave del wifi?", "expect": { "intent": "tech_support", "cites": ["clave-wifi#desde-la-app"], "replyIncludes": ["Mi Fibrasur"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-005-red-5g",
+    "tenant": "fibrasur", "contact": "5491155550105",
+    "description": "Pregunta sobre la red de 5 GHz",
+    "turns": [
+      { "customer": "¿Me conviene conectarme a la red de 5 GHz del wifi?", "expect": { "intent": "tech_support", "cites": ["internet-lento#mejorar-el-wifi"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-006-abstencion",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Pregunta técnica sin cobertura en la KB: se abstiene en vez de inventar",
+    "turns": [
+      { "customer": "¿El router soporta IPv6 y modo bridge?", "expect": { "intent": "tech_support", "abstain": true, "handoff": false } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-007-sin-resolver-n-turnos",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "Tres turnos seguidos sin resolver → deriva por max_unresolved_turns",
+    "turns": [
+      { "customer": "¿El router soporta IPv6?", "expect": { "intent": "tech_support", "abstain": true, "handoff": false } },
+      { "customer": "¿Y puedo poner el router en modo bridge?", "expect": { "intent": "tech_support", "abstain": true, "handoff": false } },
+      { "customer": "¿El router tiene IP fija?", "expect": { "intent": "tech_support", "handoff": "max_unresolved_turns" } }
+    ],
+    "expectHandoff": "max_unresolved_turns"
+  },
+  {
+    "id": "tech-008-andes-ont",
+    "tenant": "andeslink", "contact": "51987650101",
+    "description": "Misma falla en AndesLink: otra KB (ONT) y otro tono",
+    "turns": [
+      { "customer": "No tengo servicio, la luz LOS de la ONT está roja", "expect": { "intent": "tech_support", "cites": ["sin-servicio#verificar-la-ont"], "replyIncludes": ["visita"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-009-andes-clave",
+    "tenant": "andeslink", "contact": "51987650102",
+    "description": "Cambio de contraseña en AndesLink (dato distinto al de Fibrasur)",
+    "turns": [
+      { "customer": "¿Cómo cambio la contraseña del wifi?", "expect": { "intent": "tech_support", "cites": ["clave-wifi#desde-el-portal"], "replyIncludes": ["192.168.1.1"], "replyExcludes": ["Mi Fibrasur"] } }
+    ],
+    "expectHandoff": null
+  },
+  {
+    "id": "tech-010-riesgo-critico",
+    "tenant": "fibrasur", "contact": "5491155550101",
+    "description": "Riesgo para personas: deriva de inmediato",
+    "turns": [
+      { "customer": "Hay un cable de internet caído en la vereda tirando chispas", "expect": { "urgency": "critical", "handoff": "critical_urgency" } }
+    ],
+    "expectHandoff": "critical_urgency"
+  },
+  {
+    "id": "tech-011-andes-urgencia-alta",
+    "tenant": "andeslink", "contact": "51987650102",
+    "description": "AndesLink deriva urgencia alta (cliente pyme); Fibrasur no",
+    "turns": [
+      { "customer": "Es urgente, trabajo desde casa y no tengo internet hace dos días", "expect": { "intent": "tech_support", "urgency": "high", "handoff": "critical_urgency" } }
+    ],
+    "expectHandoff": "critical_urgency"
+  },
+  {
+    "id": "tech-012-fibrasur-urgencia-alta",
+    "tenant": "fibrasur", "contact": "5491155550102",
+    "description": "El mismo mensaje en Fibrasur se atiende con la IA (playbook distinto)",
+    "turns": [
+      { "customer": "Es urgente, trabajo desde casa y no tengo internet hace dos días", "expect": { "intent": "tech_support", "urgency": "high", "handoff": false, "tools": [{ "name": "search_kb" }] } }
+    ],
+    "expectHandoff": null
+  }
+]
