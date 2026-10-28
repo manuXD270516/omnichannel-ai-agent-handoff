@@ -78,6 +78,10 @@ const slim = reports.map((r) => ({
 }));
 writeFileSync(join(site, "data.js"), `window.DEMO = ${JSON.stringify({ reports: slim })};\n`);
 copyFileSync(join(root, "demo", "index.html"), join(site, "index.html"));
+// Video de la demo (grabado con scripts/record-demo.mjs) y su portada.
+for (const f of ["omnichannel-demo.webm", "omnichannel-demo-poster.png"]) {
+  if (existsSync(join(root, "demo", f))) copyFileSync(join(root, "demo", f), join(site, f));
+}
 if (existsSync(join(root, "docs", "architecture.svg"))) copyFileSync(join(root, "docs", "architecture.svg"), join(site, "architecture.svg"));
 writeFileSync(join(site, ".nojekyll"), "");
 console.log(`Demo generada en site/ con ${reports.length} reporte(s): ${reports.map((r) => r.provider).join(", ")}`);

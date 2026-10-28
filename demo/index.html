@@ -47,6 +47,12 @@
     <a href="https://github.com/manuXD270516/omnichannel-ai-agent-handoff">Código en GitHub</a>
   </div>
 
+  <h2>Video de la demo (1:50)</h2>
+  <div class="card">
+    <video src="omnichannel-demo.webm" poster="omnichannel-demo-poster.png" controls preload="metadata" playsinline style="width:100%;height:auto;border-radius:8px;display:block"></video>
+    <div class="note">Grabado sobre la app local (<code>pnpm start</code>) con el proveedor determinístico <code>scripted</code> y datos sintéticos: consulta de deuda con traza, promesa de pago, respuesta RAG con cita, derivación a humano con resumen y ficha CRM, toma humana con la IA en pausa, devolución a la IA y el mismo mensaje con otro playbook.</div>
+  </div>
+
   <h2>Resultados de evaluación</h2>
   <div class="card"><table id="metrics"></table>
     <div class="note">Scripted = proveedor determinístico basado en reglas (doble de prueba para CI): mide orquestación, políticas y handoffs, no la calidad de un modelo. La corrida con Ollama usa un modelo local real y se publica con sus números, pasen o no los gates.</div>

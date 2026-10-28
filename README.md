@@ -3,6 +3,7 @@
 Plataforma de referencia para **atención al cliente con agentes de IA y humanos en el mismo flujo**: WhatsApp (Cloud API) y voz (transcripciones), arquitectura multiagente con tools tipados, un supervisor de reglas explícitas que decide cuándo derivar a una persona, bandeja humana con resumen y contexto del CRM, **playbooks por cliente** y una suite de evaluación con gates en CI.
 
 - **Demo estática (sin backend):** https://manuxd270516.github.io/omnichannel-ai-agent-handoff/ · [bandeja humana en modo replay](https://manuxd270516.github.io/omnichannel-ai-agent-handoff/dashboard.html)
+- **Video de la demo (1:50):** [Google Drive](https://drive.google.com/file/d/1zBHvld9IjsNlATUJNCjW3IqBOZktoofy/view?usp=sharing) · [en GitHub Pages](https://manuxd270516.github.io/omnichannel-ai-agent-handoff/omnichannel-demo.webm). Recorrido sobre la app local con el proveedor `scripted`: deuda con traza, promesa de pago, RAG con cita, derivación con resumen y ficha CRM, toma humana con la IA en pausa y el mismo mensaje con otro playbook. Se graba con `node scripts/record-demo.mjs <salida.webm>`.
 - Stack: TypeScript, Node 22, Hono (Node y Cloudflare Workers), zod, SQLite/D1, Ollama, Vitest, Playwright, GitHub Actions.
 
 > Todos los datos son **sintéticos**: dos proveedores de internet ficticios (Fibrasur, Argentina; AndesLink, Perú), clientes inventados, números de teléfono de rango ficticio y emails `@example.com`. No hay clientes reales ni conexión real a Meta.
